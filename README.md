@@ -69,6 +69,11 @@ coverage and practical device behavior that made this standalone version
 possible. Its BSD 3-Clause license and copyright notice are preserved in
 [LICENSE](LICENSE).
 
+The extraction was based on upstream commit
+[`239d45b`](https://github.com/smd-ros-devel/lynxmotion_ssc32u/commit/239d45b493f91f6ffc28034ae79cb9e67d4f137d),
+primarily `lynxmotion_ssc32u_driver/include/lynxmotion_ssc32u_driver/ssc32.hpp`
+and `lynxmotion_ssc32u_driver/src/ssc32.cpp`.
+
 The extraction removes ROS-specific code, introduces a transport boundary,
 replaces fixed buffers and unchecked C string operations, handles partial I/O,
 adds bounded timeouts and validation, and provides automated tests and installable
