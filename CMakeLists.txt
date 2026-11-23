@@ -4,6 +4,7 @@ project(ssc32 VERSION 0.1.0 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
+include(CTest)
 
 option(SSC32_BUILD_TESTING "Build the test suite" ON)
 option(SSC32_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
@@ -33,6 +34,7 @@ set_target_properties(ssc32 PROPERTIES
   VERSION ${PROJECT_VERSION}
   SOVERSION ${PROJECT_VERSION_MAJOR}
   EXPORT_NAME ssc32
+  POSITION_INDEPENDENT_CODE ON
 )
 
 install(TARGETS ssc32 EXPORT ssc32Targets
@@ -64,7 +66,6 @@ install(FILES
 )
 
 if(SSC32_BUILD_TESTING)
-  enable_testing()
   add_executable(ssc32_tests tests/ssc32_tests.cpp)
   target_link_libraries(ssc32_tests PRIVATE ssc32::ssc32)
   target_compile_features(ssc32_tests PRIVATE cxx_std_17)

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>ssc32</name>
+  <version>0.1.0</version>
+  <description>A small, dependency-free C++17 library for the Lynxmotion SSC-32 protocol.</description>
+  <maintainer email="MartinPeris@users.noreply.github.com">Martin Peris</maintainer>
+  <license>BSD-3-Clause</license>
+
+  <export>
+    <build_type>cmake</build_type>
+  </export>
+</package>

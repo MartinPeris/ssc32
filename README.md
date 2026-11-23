@@ -31,6 +31,17 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
+The repository also includes dependency-free package metadata so a source
+checkout can be discovered and ordered by `colcon` without coupling this
+library to ROS:
+
+```sh
+mkdir -p workspace/src
+git clone https://github.com/MartinPeris/ssc32.git workspace/src/ssc32
+cd workspace
+colcon build --packages-select ssc32
+```
+
 ## Example
 
 ```cpp

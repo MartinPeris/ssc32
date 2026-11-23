@@ -35,3 +35,18 @@ jobs:
         run: ctest --test-dir build --output-on-failure
       - name: Verify installation
         run: cmake --install build --prefix "${{ runner.temp }}/ssc32-install"
+
+  colcon:
+    name: colcon · ROS 2 Lyrical
+    runs-on: ubuntu-latest
+    container: ros:lyrical-ros-base
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: src/ssc32
+      - name: Build as a plain CMake package
+        run: colcon build --packages-select ssc32 --event-handlers console_direct+
+      - name: Test
+        run: colcon test --packages-select ssc32 --event-handlers console_direct+
+      - name: Report test results
+        run: colcon test-result --verbose
