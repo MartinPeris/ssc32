@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "line": {
+    "covered": 230,
+    "total": 246
+  },
+  "branch": {
+    "covered": 206,
+    "total": 230
+  }
+}
