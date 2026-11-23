@@ -3,8 +3,8 @@ set -euo pipefail
 
 readonly workspace=/workspace
 readonly source_dir="${workspace}/src/ssc32"
-readonly coverage_lines_minimum=39
-readonly coverage_branches_minimum=48
+readonly coverage_lines_minimum=93
+readonly coverage_branches_minimum=89
 
 section() {
   printf '\n==> %s\n' "$1"

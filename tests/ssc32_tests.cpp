@@ -57,6 +57,16 @@ void expect_protocol_error(Callable&& callable, const std::string_view test_name
   }
 }
 
+template <typename Callable>
+void expect_runtime_error(Callable&& callable, const std::string_view test_name) {
+  try {
+    callable();
+    std::cerr << "FAIL: " << test_name << " did not throw\n";
+    ++failures;
+  } catch (const std::runtime_error&) {
+  }
+}
+
 void test_protocol_encoding() {
   using namespace std::chrono_literals;
   expect_equal(ssc32::Protocol::move({{0, 1500, 500}, {5, 2200, std::nullopt}}, 750ms),
@@ -82,6 +92,10 @@ void test_validation() {
                         "invalid channel");
   expect_protocol_error([] { (void)ssc32::Protocol::move({{0, 499, {}}}); },
                         "invalid pulse width");
+  expect_protocol_error([] { (void)ssc32::Protocol::move({{0, 2501, {}}}); },
+                        "pulse width above maximum");
+  expect_protocol_error([] { (void)ssc32::Protocol::move({{0, 1500, 0}}); },
+                        "zero servo speed");
   expect_protocol_error(
       [] { (void)ssc32::Protocol::move({{0, 1500, {}}, {0, 1600, {}}}); },
       "duplicate channel");
@@ -89,6 +103,26 @@ void test_validation() {
                         "invalid duration");
   expect_protocol_error([] { (void)ssc32::Protocol::pulse_offsets({{0, 101}}); },
                         "invalid pulse offset");
+  expect_protocol_error([] { (void)ssc32::Protocol::pulse_offsets({{0, -101}}); },
+                        "negative pulse offset below minimum");
+  expect_protocol_error([] { (void)ssc32::Protocol::pulse_offsets({}); },
+                        "empty pulse-offset group");
+  expect_protocol_error([] { (void)ssc32::Protocol::discrete_outputs({}); },
+                        "empty discrete-output group");
+  expect_protocol_error([] { (void)ssc32::Protocol::byte_output(4, 0); },
+                        "invalid byte-output bank");
+  expect_protocol_error([] { (void)ssc32::Protocol::query_pulse_widths({}); },
+                        "empty pulse query");
+  expect_protocol_error(
+      [] {
+        std::vector<ssc32::ServoCommand> commands;
+        for (std::uint8_t channel = 0; channel < 32; ++channel) {
+          commands.push_back({channel, 1500, std::nullopt});
+        }
+        commands.push_back({0, 1500, std::nullopt});
+        (void)ssc32::Protocol::move(commands);
+      },
+      "command group above maximum size");
 }
 
 void test_controller() {
@@ -99,12 +133,30 @@ void test_controller() {
   controller.move({{3, 1750, 250}}, 1000ms);
   expect_equal(transport.writes.back(), "#3 P1750 S250 T1000 \r", "controller move");
 
+  controller.cancel();
+  expect_equal(transport.writes.back(), std::string{"\x1B\r", 2}, "controller cancel");
+  controller.set_pulse_offsets({{2, -10}});
+  expect_equal(transport.writes.back(), "#2 PO-10 \r", "controller pulse offsets");
+  controller.set_discrete_outputs({{7, true}});
+  expect_equal(transport.writes.back(), "#7 H \r", "controller discrete output");
+  controller.set_byte_output(1, 42);
+  expect_equal(transport.writes.back(), "#1:42 \r", "controller byte output");
+
   transport.binary_response = {static_cast<std::uint8_t>('+')};
   if (!controller.is_moving(100ms)) {
     std::cerr << "FAIL: controller movement response\n";
     ++failures;
   }
   expect_equal(transport.writes.back(), "Q\r", "controller movement query");
+
+  transport.binary_response = {static_cast<std::uint8_t>('.')};
+  if (controller.is_moving(100ms)) {
+    std::cerr << "FAIL: controller stopped response\n";
+    ++failures;
+  }
+  transport.binary_response = {static_cast<std::uint8_t>('?')};
+  expect_runtime_error([&controller] { (void)controller.is_moving(100ms); },
+                       "invalid controller movement response");
 
   transport.binary_response = {150, 200};
   const auto widths = controller.query_pulse_widths({0, 1}, 100ms);

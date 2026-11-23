@@ -76,4 +76,17 @@ if(SSC32_BUILD_TESTING)
     )
   endif()
   add_test(NAME ssc32_tests COMMAND ssc32_tests)
+
+  if(UNIX)
+    add_executable(ssc32_serial_transport_tests tests/serial_transport_tests.cpp)
+    target_link_libraries(ssc32_serial_transport_tests PRIVATE ssc32::ssc32)
+    target_compile_features(ssc32_serial_transport_tests PRIVATE cxx_std_17)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+      target_compile_options(ssc32_serial_transport_tests PRIVATE
+        -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion
+        $<$<BOOL:${SSC32_WARNINGS_AS_ERRORS}>:-Werror>
+      )
+    endif()
+    add_test(NAME ssc32_serial_transport_tests COMMAND ssc32_serial_transport_tests)
+  endif()
 endif()
