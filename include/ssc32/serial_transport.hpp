@@ -20,9 +20,8 @@ class SerialTransport final : public Transport {
   void write_all(std::string_view data) override;
   [[nodiscard]] std::vector<std::uint8_t> read_exact(
       std::size_t size, std::chrono::milliseconds timeout) override;
-  [[nodiscard]] std::string read_until(
-      char delimiter, std::size_t max_size,
-      std::chrono::milliseconds timeout) override;
+  [[nodiscard]] std::string read_until(char delimiter, std::size_t max_size,
+                                       std::chrono::milliseconds timeout) override;
 
   [[nodiscard]] bool is_open() const noexcept;
   void close() noexcept;

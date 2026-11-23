@@ -17,9 +17,8 @@ class Transport {
   virtual void write_all(std::string_view data) = 0;
   [[nodiscard]] virtual std::vector<std::uint8_t> read_exact(
       std::size_t size, std::chrono::milliseconds timeout) = 0;
-  [[nodiscard]] virtual std::string read_until(
-      char delimiter, std::size_t max_size,
-      std::chrono::milliseconds timeout) = 0;
+  [[nodiscard]] virtual std::string read_until(char delimiter, std::size_t max_size,
+                                               std::chrono::milliseconds timeout) = 0;
 };
 
 }  // namespace ssc32

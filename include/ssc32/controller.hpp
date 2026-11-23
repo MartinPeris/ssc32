@@ -25,8 +25,7 @@ class Controller final {
 
   [[nodiscard]] bool is_moving(std::chrono::milliseconds timeout);
   [[nodiscard]] std::vector<std::uint16_t> query_pulse_widths(
-      const std::vector<std::uint8_t>& channels,
-      std::chrono::milliseconds timeout);
+      const std::vector<std::uint8_t>& channels, std::chrono::milliseconds timeout);
   [[nodiscard]] std::string version(std::chrono::milliseconds timeout,
                                     std::size_t max_size = 128);
 

@@ -15,8 +15,7 @@ void validate_channel(const std::uint8_t channel) {
 }
 
 template <typename Item, typename ChannelAccessor>
-void validate_group(const std::vector<Item>& items,
-                    ChannelAccessor channel_accessor) {
+void validate_group(const std::vector<Item>& items, ChannelAccessor channel_accessor) {
   if (items.empty()) {
     throw ProtocolError("SSC-32 command group must not be empty");
   }
@@ -37,11 +36,9 @@ void validate_group(const std::vector<Item>& items,
 
 }  // namespace
 
-std::string Protocol::move(
-    const std::vector<ServoCommand>& commands,
-    const std::optional<std::chrono::milliseconds> duration) {
-  validate_group(commands,
-                 [](const ServoCommand& command) { return command.channel; });
+std::string Protocol::move(const std::vector<ServoCommand>& commands,
+                           const std::optional<std::chrono::milliseconds> duration) {
+  validate_group(commands, [](const ServoCommand& command) { return command.channel; });
 
   if (duration.has_value() && duration->count() <= 0) {
     throw ProtocolError("SSC-32 move duration must be positive");
@@ -76,8 +73,7 @@ std::string Protocol::move(
 std::string Protocol::cancel() { return std::string{"\x1B\r", 2}; }
 
 std::string Protocol::pulse_offsets(const std::vector<PulseOffset>& offsets) {
-  validate_group(offsets,
-                 [](const PulseOffset& offset) { return offset.channel; });
+  validate_group(offsets, [](const PulseOffset& offset) { return offset.channel; });
 
   std::ostringstream message;
   for (const auto& offset : offsets) {
@@ -91,10 +87,8 @@ std::string Protocol::pulse_offsets(const std::vector<PulseOffset>& offsets) {
   return message.str();
 }
 
-std::string Protocol::discrete_outputs(
-    const std::vector<DiscreteOutput>& outputs) {
-  validate_group(outputs,
-                 [](const DiscreteOutput& output) { return output.channel; });
+std::string Protocol::discrete_outputs(const std::vector<DiscreteOutput>& outputs) {
+  validate_group(outputs, [](const DiscreteOutput& output) { return output.channel; });
 
   std::ostringstream message;
   for (const auto& output : outputs) {
@@ -105,8 +99,7 @@ std::string Protocol::discrete_outputs(
   return message.str();
 }
 
-std::string Protocol::byte_output(const std::uint8_t bank,
-                                  const std::uint8_t value) {
+std::string Protocol::byte_output(const std::uint8_t bank, const std::uint8_t value) {
   if (bank > 3U) {
     throw ProtocolError("SSC-32 output bank must be in the range 0..3");
   }
@@ -118,10 +111,8 @@ std::string Protocol::byte_output(const std::uint8_t bank,
 
 std::string Protocol::query_movement_status() { return "Q\r"; }
 
-std::string Protocol::query_pulse_widths(
-    const std::vector<std::uint8_t>& channels) {
-  validate_group(channels,
-                 [](const std::uint8_t channel) { return channel; });
+std::string Protocol::query_pulse_widths(const std::vector<std::uint8_t>& channels) {
+  validate_group(channels, [](const std::uint8_t channel) { return channel; });
 
   std::ostringstream message;
   for (const auto channel : channels) {

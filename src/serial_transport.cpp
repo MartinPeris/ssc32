@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #include "ssc32/serial_transport.hpp"
 
+#include <fcntl.h>
+#include <poll.h>
+#include <termios.h>
+#include <unistd.h>
+
 #include <cerrno>
 #include <chrono>
 #include <cstring>
 #include <stdexcept>
 #include <system_error>
-
-#include <fcntl.h>
-#include <poll.h>
-#include <termios.h>
-#include <unistd.h>
 
 namespace ssc32 {
 namespace {
@@ -35,8 +35,7 @@ speed_t to_termios_baud(const unsigned int baud_rate) {
   throw std::system_error(errno, std::generic_category(), operation);
 }
 
-int remaining_timeout_ms(
-    const std::chrono::steady_clock::time_point deadline) {
+int remaining_timeout_ms(const std::chrono::steady_clock::time_point deadline) {
   const auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>(
       deadline - std::chrono::steady_clock::now());
   if (remaining.count() <= 0) {
@@ -65,9 +64,8 @@ void wait_for_input(const int file_descriptor,
   }
 }
 
-std::uint8_t read_byte(
-    const int file_descriptor,
-    const std::chrono::steady_clock::time_point deadline) {
+std::uint8_t read_byte(const int file_descriptor,
+                       const std::chrono::steady_clock::time_point deadline) {
   while (true) {
     wait_for_input(file_descriptor, deadline);
     std::uint8_t value{};
@@ -101,8 +99,7 @@ SerialTransport::SerialTransport(const std::string& device,
     }
 
     ::cfmakeraw(&options);
-    if (::cfsetispeed(&options, baud) != 0 ||
-        ::cfsetospeed(&options, baud) != 0) {
+    if (::cfsetispeed(&options, baud) != 0 || ::cfsetospeed(&options, baud) != 0) {
       throw_system_error("set SSC-32 baud rate");
     }
     options.c_cflag |= static_cast<tcflag_t>(CLOCAL | CREAD);
@@ -148,8 +145,8 @@ void SerialTransport::write_all(const std::string_view data) {
 
   std::size_t written = 0;
   while (written < data.size()) {
-    const auto count = ::write(file_descriptor_, data.data() + written,
-                               data.size() - written);
+    const auto count =
+        ::write(file_descriptor_, data.data() + written, data.size() - written);
     if (count > 0) {
       written += static_cast<std::size_t>(count);
       continue;
@@ -182,9 +179,9 @@ std::vector<std::uint8_t> SerialTransport::read_exact(
   return data;
 }
 
-std::string SerialTransport::read_until(
-    const char delimiter, const std::size_t max_size,
-    const std::chrono::milliseconds timeout) {
+std::string SerialTransport::read_until(const char delimiter,
+                                        const std::size_t max_size,
+                                        const std::chrono::milliseconds timeout) {
   if (!is_open()) {
     throw std::logic_error("SSC-32 serial port is not open");
   }

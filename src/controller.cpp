@@ -7,9 +7,8 @@ namespace ssc32 {
 
 Controller::Controller(Transport& transport) noexcept : transport_(transport) {}
 
-void Controller::move(
-    const std::vector<ServoCommand>& commands,
-    const std::optional<std::chrono::milliseconds> duration) {
+void Controller::move(const std::vector<ServoCommand>& commands,
+                      const std::optional<std::chrono::milliseconds> duration) {
   transport_.write_all(Protocol::move(commands, duration));
 }
 
@@ -19,13 +18,11 @@ void Controller::set_pulse_offsets(const std::vector<PulseOffset>& offsets) {
   transport_.write_all(Protocol::pulse_offsets(offsets));
 }
 
-void Controller::set_discrete_outputs(
-    const std::vector<DiscreteOutput>& outputs) {
+void Controller::set_discrete_outputs(const std::vector<DiscreteOutput>& outputs) {
   transport_.write_all(Protocol::discrete_outputs(outputs));
 }
 
-void Controller::set_byte_output(const std::uint8_t bank,
-                                 const std::uint8_t value) {
+void Controller::set_byte_output(const std::uint8_t bank, const std::uint8_t value) {
   transport_.write_all(Protocol::byte_output(bank, value));
 }
 

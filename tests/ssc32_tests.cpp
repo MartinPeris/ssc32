@@ -17,20 +17,17 @@ namespace {
 
 class FakeTransport final : public ssc32::Transport {
  public:
-  void write_all(const std::string_view data) override {
-    writes.emplace_back(data);
-  }
+  void write_all(const std::string_view data) override { writes.emplace_back(data); }
 
-  std::vector<std::uint8_t> read_exact(
-      const std::size_t size, std::chrono::milliseconds) override {
+  std::vector<std::uint8_t> read_exact(const std::size_t size,
+                                       std::chrono::milliseconds) override {
     if (binary_response.size() != size) {
       throw std::runtime_error("unexpected fake read size");
     }
     return binary_response;
   }
 
-  std::string read_until(char, std::size_t,
-                         std::chrono::milliseconds) override {
+  std::string read_until(char, std::size_t, std::chrono::milliseconds) override {
     return text_response;
   }
 
@@ -41,8 +38,7 @@ class FakeTransport final : public ssc32::Transport {
 
 int failures = 0;
 
-void expect_equal(const std::string_view actual,
-                  const std::string_view expected,
+void expect_equal(const std::string_view actual, const std::string_view expected,
                   const std::string_view test_name) {
   if (actual != expected) {
     std::cerr << "FAIL: " << test_name << "\n  expected: " << expected
@@ -63,42 +59,36 @@ void expect_protocol_error(Callable&& callable, const std::string_view test_name
 
 void test_protocol_encoding() {
   using namespace std::chrono_literals;
-  expect_equal(
-      ssc32::Protocol::move({{0, 1500, 500}, {5, 2200, std::nullopt}}, 750ms),
-      "#0 P1500 S500 #5 P2200 T750 \r", "group move encoding");
+  expect_equal(ssc32::Protocol::move({{0, 1500, 500}, {5, 2200, std::nullopt}}, 750ms),
+               "#0 P1500 S500 #5 P2200 T750 \r", "group move encoding");
   expect_equal(ssc32::Protocol::pulse_offsets({{1, -20}, {2, 35}}),
                "#1 PO-20 #2 PO35 \r", "pulse offset encoding");
   expect_equal(ssc32::Protocol::discrete_outputs({{7, true}, {8, false}}),
                "#7 H #8 L \r", "discrete output encoding");
   expect_equal(ssc32::Protocol::byte_output(2, 173), "#2:173 \r",
                "byte output encoding");
-  expect_equal(ssc32::Protocol::query_pulse_widths({0, 4, 31}),
-               "QP0QP4QP31\r", "pulse query encoding");
+  expect_equal(ssc32::Protocol::query_pulse_widths({0, 4, 31}), "QP0QP4QP31\r",
+               "pulse query encoding");
   expect_equal(ssc32::Protocol::query_movement_status(), "Q\r",
                "movement query encoding");
   expect_equal(ssc32::Protocol::version(), "VER\r", "version encoding");
-  expect_equal(ssc32::Protocol::cancel(), std::string{"\x1B\r", 2},
-               "cancel encoding");
+  expect_equal(ssc32::Protocol::cancel(), std::string{"\x1B\r", 2}, "cancel encoding");
 }
 
 void test_validation() {
   using namespace std::chrono_literals;
-  expect_protocol_error([] { (void)ssc32::Protocol::move({}); },
-                        "empty move group");
+  expect_protocol_error([] { (void)ssc32::Protocol::move({}); }, "empty move group");
   expect_protocol_error([] { (void)ssc32::Protocol::move({{32, 1500, {}}}); },
                         "invalid channel");
-  expect_protocol_error(
-      [] { (void)ssc32::Protocol::move({{0, 499, {}}}); },
-      "invalid pulse width");
+  expect_protocol_error([] { (void)ssc32::Protocol::move({{0, 499, {}}}); },
+                        "invalid pulse width");
   expect_protocol_error(
       [] { (void)ssc32::Protocol::move({{0, 1500, {}}, {0, 1600, {}}}); },
       "duplicate channel");
-  expect_protocol_error(
-      [] { (void)ssc32::Protocol::move({{0, 1500, {}}}, 0ms); },
-      "invalid duration");
-  expect_protocol_error(
-      [] { (void)ssc32::Protocol::pulse_offsets({{0, 101}}); },
-      "invalid pulse offset");
+  expect_protocol_error([] { (void)ssc32::Protocol::move({{0, 1500, {}}}, 0ms); },
+                        "invalid duration");
+  expect_protocol_error([] { (void)ssc32::Protocol::pulse_offsets({{0, 101}}); },
+                        "invalid pulse offset");
 }
 
 void test_controller() {
@@ -107,8 +97,7 @@ void test_controller() {
   ssc32::Controller controller(transport);
 
   controller.move({{3, 1750, 250}}, 1000ms);
-  expect_equal(transport.writes.back(), "#3 P1750 S250 T1000 \r",
-               "controller move");
+  expect_equal(transport.writes.back(), "#3 P1750 S250 T1000 \r", "controller move");
 
   transport.binary_response = {static_cast<std::uint8_t>('+')};
   if (!controller.is_moving(100ms)) {

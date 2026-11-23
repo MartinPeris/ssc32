@@ -24,7 +24,7 @@ class ProtocolError : public std::invalid_argument {
 struct ServoCommand {
   std::uint8_t channel{};
   std::uint16_t pulse_width_us{kCenterPulseWidthUs};
-  std::optional<std::uint16_t> speed_us_per_second{};
+  std::optional<std::uint16_t> speed_us_per_second;
 };
 
 struct PulseOffset {
@@ -48,8 +48,7 @@ class Protocol final {
       const std::vector<PulseOffset>& offsets);
   [[nodiscard]] static std::string discrete_outputs(
       const std::vector<DiscreteOutput>& outputs);
-  [[nodiscard]] static std::string byte_output(std::uint8_t bank,
-                                               std::uint8_t value);
+  [[nodiscard]] static std::string byte_output(std::uint8_t bank, std::uint8_t value);
   [[nodiscard]] static std::string query_movement_status();
   [[nodiscard]] static std::string query_pulse_widths(
       const std::vector<std::uint8_t>& channels);
